@@ -102,7 +102,14 @@ For one project only, put the same section in `.codex/config.toml` in that folde
 
 ## Claude desktop app
 
-The app has three tabs. Confirmation dialogs (elicitation) are not supported in Chat and Cowork, and the Code tab declines them without showing a dialog. For **end-to-end testing, UAT, functional testing and simple configuration work** use `--auto-save` so saves proceed without asking. For production-like safety prefer a client that shows the questions or stay in read-only mode.
+The app has three tabs. Native MCP elicitation dialogs are not reliably shown in Chat and Cowork, and the Code tab often declines them without displaying anything.
+
+**Two ways to handle saves:**
+
+1. **`--auto-save`** (recommended for UAT / functional / end-to-end testing and simple configuration work): saves proceed without any confirmation prompt.
+2. **Windows desktop dialog fallback** (default when `--auto-save` is not used): if the MCP client does not show an elicitation dialog (or answers too fast), the server automatically displays a native Windows Yes/No MessageBox on your desktop. You can approve or reject the save there. This works even when Claude Desktop itself does not surface the MCP confirmation UI.
+
+For production-like safety prefer a client that shows the MCP questions, or use `--read-only`.
 
 - **Chat and Cowork** read `%APPDATA%\Claude\claude_desktop_config.json`:
 

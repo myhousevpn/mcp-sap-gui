@@ -36,7 +36,11 @@ Three more rules protect the answer:
 
 ## Clients that cannot show the questions
 
-The question has to reach you. Some clients never show it: the Claude desktop app declines at once without showing anything, and its Chat and Cowork tabs do not support the questions at all ([Clients](CLIENTS.md) has the list). There, a save and every action at a confirmation point are refused, and the refusal tells the assistant to tell you and to use a client that shows the questions. A confirmation point cannot be switched off there either, since switching it off asks too. For Claude Desktop use `--auto-save` when you need unattended saves during testing.
+The question has to reach you. Some clients never show MCP elicitation dialogs: the Claude desktop app (Chat / Cowork / Code tab) often declines them without displaying anything ([Clients](CLIENTS.md)).
+
+**Windows desktop dialog fallback:** When MCP elicitation is not available or is answered too quickly (no person saw a dialog), the server automatically shows a native Windows Yes/No MessageBox on the desktop so you can still approve or reject the save. This makes confirmations work in Claude Desktop without requiring `--auto-save`.
+
+For fully unattended runs during testing you can still use `--auto-save`. A confirmation point cannot be switched off in a client that cannot show dialogs, since switching it off also asks.
 
 ## Switching points on and off
 

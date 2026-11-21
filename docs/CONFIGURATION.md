@@ -23,7 +23,7 @@ Options go after the package name in the client's server configuration, for exam
 | `--read-only` | Refuses every tool that can change something: field writes, buttons, transactions, keys, table and tree actions. Reading works |
 | `--profile exploration\|operator\|full` | Which tools the assistant sees at all (default `full`). See [Profiles](#profiles) |
 | `--confirm POINT ...` | Confirmation points for every chat: `transactions`, `batch_fields`, `field_writes`, `all_writes`, `attach`. A chat can add points but never remove these. See [Confirmations](CONFIRMATIONS.md) |
-| `--auto-save` | Disable the always-on save confirmation. Saves (F11, Save button, save-shaped popups) proceed without asking. Intended for end-to-end testing, UAT, functional testing and Claude Desktop (where confirmation dialogs are not supported). Use only on non-production systems. |
+| `--auto-save` | Disable the always-on save confirmation. Saves (F11, Save button, save-shaped popups) proceed without asking. Intended for end-to-end testing, UAT, functional testing and Claude Desktop. Use only on non-production systems. Without this flag, a Windows MessageBox fallback is used when MCP elicitation is not shown. |
 | `--policy-preset default\|abap-dev\|strict` | Which transactions the assistant may start (default: the preset named in the policy file, else `default`) |
 | `--policy-file FILE` | A JSON transaction policy with your own blocks and allows |
 | `--allowed-transactions T ...` | Older allowlist; it restricts on top of the policy |

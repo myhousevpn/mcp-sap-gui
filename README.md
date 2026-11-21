@@ -47,7 +47,7 @@ Step by step, including updating to a new release: [Getting started](https://git
 
 ## Safety
 
-- **Saves wait for your yes** by default (disable with `--auto-save` for testing / Claude Desktop), and you can make other changes wait too, for example every field write: [Confirmations](docs/CONFIRMATIONS.md).
+- **Saves wait for your yes** by default. Use `--auto-save` to skip the confirmation (ideal for testing). On Windows, if the MCP client does not show the dialog (common in Claude Desktop), a native Windows Yes/No MessageBox appears automatically so you can still approve or reject: [Confirmations](docs/CONFIRMATIONS.md).
 - **A transaction policy** decides which transactions the assistant may start; read-only mode and profiles limit it further.
 - **An audit log** records every call, question and answer.
 - **Everything runs as the logged-on SAP user**, under that user's authorizations, which remain the real boundary.

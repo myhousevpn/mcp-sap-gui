@@ -977,6 +977,38 @@ def _parse_key(key: str) -> int:
     return _KEY_MAP[key]
 
 
+
+# ---------------------------------------------------------------------------
+# Windows desktop notification fallback for clients that do not show MCP elicitation
+# (notably Claude Desktop Chat / Cowork / Code tab)
+# ---------------------------------------------------------------------------
+
+def _windows_message_box(message: str, title: str = "SAP GUI MCP - Confirm Save") -> bool:
+    """Show a native Windows Yes/No dialog. Returns True if the user clicks Yes.
+
+    Used as a fallback when the MCP client (e.g. Claude Desktop) does not
+    display elicitation dialogs. Requires an interactive Windows desktop session.
+    """
+    try:
+        import ctypes
+        # MB_YESNO | MB_ICONQUESTION | MB_TOPMOST | MB_SETFOREGROUND
+        MB_YESNO = 0x00000004
+        MB_ICONQUESTION = 0x00000020
+        MB_TOPMOST = 0x00040000
+        MB_SETFOREGROUND = 0x00010000
+        IDYES = 6
+        result = ctypes.windll.user32.MessageBoxW(
+            0,
+            message,
+            title,
+            MB_YESNO | MB_ICONQUESTION | MB_TOPMOST | MB_SETFOREGROUND,
+        )
+        return result == IDYES
+    except Exception as exc:
+        logger.warning("Windows MessageBox fallback failed: %s", exc)
+        return False
+
+
 # Keys that trigger a save confirmation via elicitation
 _SAVE_KEYS = {"F11", "Save"}
 
@@ -1000,16 +1032,30 @@ async def _elicit_save(ctx: Context, message: str,
                                 gate="save", can_ask=True, shown=shown)
     except McpError as exc:
         log_confirmation_event(SAVE_POINT, tool, "unsupported_client")
-        raise ValueError(
-            f"Save action requires confirmation but the client does not "
-            f"support elicitation ({exc}). Nothing was sent to SAP."
-            f"{NO_DIALOGS_NOTE}"
-        ) from exc
+        # Claude Desktop and some other clients do not show elicitation dialogs.
+        # Fall back to a native Windows MessageBox so the user can still approve.
+        logger.info("MCP elicitation unsupported; falling back to Windows MessageBox")
+        if _windows_message_box(message, title):
+            log_confirmation_event(SAVE_POINT, tool, "accepted_via_windows_dialog")
+            return None  # proceed
+        else:
+            log_confirmation_event(SAVE_POINT, tool, "declined_via_windows_dialog")
+            return "decline", " (declined via Windows dialog)"
 
     if isinstance(answer, Ask):
         return answer
     if answer.yes:
         return None  # proceed
+    # Fast decline often means the client (Claude Desktop) answered without showing a dialog.
+    # Offer a real Windows dialog as fallback so the user can still decide.
+    if answer.elapsed_ms < 500 and "no person" in (answer.note or "").lower():
+        logger.info("Fast decline detected; falling back to Windows MessageBox")
+        if _windows_message_box(message, title):
+            log_confirmation_event(SAVE_POINT, tool, "accepted_via_windows_dialog")
+            return None
+        else:
+            log_confirmation_event(SAVE_POINT, tool, "declined_via_windows_dialog")
+            return "decline", " (declined via Windows dialog after fast client decline)"
     return answer.action, answer.note
 
 
