@@ -20,7 +20,9 @@ It works with any MCP client that can start a local server: Claude Code, GitHub 
 - **Handles popups**, recognising questions, warnings, F4 lists and SAP messages in any logon language.
 - **Shows before it saves:** a preview of the screen and the values about to be written, and screenshots on request.
 
-More, with example prompts: [What it can do](https://github.com/kts982/mcp-sap-gui/blob/master/docs/OVERVIEW.md).
+More, with example prompts and clear limitations: [What it can do](docs/OVERVIEW.md).
+
+**Recommended for** end-to-end testing (UAT, functional testing), simple configuration work, and assisted SAP GUI flows. Not intended as fully unattended production automation.
 
 ## Requirements
 

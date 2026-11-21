@@ -38,6 +38,31 @@ The server teaches every client how to work with SAP GUI:
 
 The tool reference, for developers and the curious: [Tools](TOOLS.md).
 
+## Recommended use
+
+This server is especially useful for:
+
+- **End-to-end testing** (UAT, functional testing, regression checks)
+- **Simple configuration work** (SM30/SM34 table maintenance, IMG activities, master data setup)
+- **Assisted exploration** of SAP GUI screens while you watch the actions in real time
+- **Repetitive display and change flows** on standard or lightly customized transactions
+
+For these scenarios, start the server with `--auto-save` (or rely on the Windows MessageBox fallback) so confirmations do not interrupt the flow.
+
+## Known limitations
+
+No SAP GUI automation is 100% reliable. Important gaps:
+
+- **Not every save is recognized.** Only the standard Save toolbar button (`wnd[0]/tbar[0]/btn[11]`) and F11 are treated as saves. Saves through menus (e.g. Table View → Save in SM30), ALV toolbars, or custom application buttons are **not** gated and can run without confirmation.
+- **Element IDs differ** between systems, releases and customizing. The assistant must discover them on the current screen; guessing often fails.
+- **Some popups cannot be fully read.** Questions shown in a browser control are not readable by scripting. The server still asks before answering them, but the exact text may be missing.
+- **Custom or heavily modified screens** can behave differently from standard ones.
+- **Depends on the AI assistant.** The tools are provided; the model must choose the correct sequence, handle errors, page through tables, etc. Complex multi-step processes can fail if the model takes a wrong path.
+- **Environment requirements.** SAP GUI Scripting must be enabled on both client and system. Only SAP GUI for Windows is supported. Everything runs under the logged-on user’s authorizations.
+- **Claude Desktop.** Native MCP elicitation dialogs are often not shown. Use `--auto-save` for unattended testing or rely on the automatic Windows MessageBox fallback.
+
+Always verify critical results in SAP GUI, especially on production-like systems.
+
 ## What it covers
 
 Supported:

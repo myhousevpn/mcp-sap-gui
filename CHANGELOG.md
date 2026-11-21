@@ -3,13 +3,10 @@
 ### Added
 - `--auto-save` flag to skip the always-on save confirmation (useful for UAT / functional / end-to-end testing and Claude Desktop).
 - Windows MessageBox fallback: when an MCP client (notably Claude Desktop) does not show elicitation dialogs, a native Yes/No dialog appears on the desktop so saves can still be approved or rejected.
+- Clear **Recommended use** and **Known limitations** sections in the documentation.
 
 ### Changed
-- Documentation updated for Claude Desktop optimization and the new auto-save + notification fallback behavior.
-
-# Changelog
-
-Every release and what changed for someone running the server. The [GitHub release pages](https://github.com/kts982/mcp-sap-gui/releases) also list the merged pull requests and their authors.
+- Documentation updated (English) for Claude Desktop optimization, testing use cases, and explicit limitations.
 
 ## 0.6.1 — 2026-11-16
 
