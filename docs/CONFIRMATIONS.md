@@ -4,7 +4,7 @@ Some actions wait for your answer before they reach SAP. The server asks the que
 
 ## What asks
 
-**A save asks.** This cannot be switched off. It covers the standard ways to save:
+**A save asks** (unless the server was started with `--auto-save`). It covers the standard ways to save:
 
 - `F11` / the Save key, and the Save button in the toolbar (`wnd[0]/tbar[0]/btn[11]`);
 - on a popup: a Save button, Yes or OK on a popup about saving, and any answer except Cancel to a popup whose question the server cannot read (SAP shows some questions in a browser control that scripting cannot read: the question then tells you to check the SAP window).
@@ -36,7 +36,7 @@ Three more rules protect the answer:
 
 ## Clients that cannot show the questions
 
-The question has to reach you. Some clients never show it: the Claude desktop app declines at once without showing anything, and its Chat and Cowork tabs do not support the questions at all ([Clients](CLIENTS.md) has the list). There, a save and every action at a confirmation point are refused, and the refusal tells the assistant to tell you and to use a client that shows the questions. A confirmation point cannot be switched off there either, since switching it off asks too.
+The question has to reach you. Some clients never show it: the Claude desktop app declines at once without showing anything, and its Chat and Cowork tabs do not support the questions at all ([Clients](CLIENTS.md) has the list). There, a save and every action at a confirmation point are refused, and the refusal tells the assistant to tell you and to use a client that shows the questions. A confirmation point cannot be switched off there either, since switching it off asks too. For Claude Desktop use `--auto-save` when you need unattended saves during testing.
 
 ## Switching points on and off
 
@@ -50,7 +50,7 @@ Ask the assistant to *"show me the values first"*: `sap_preview` shows the curre
 
 ## In the audit log
 
-With `--audit-log`, every question and answer gets a `confirmation` line: the point, the tool, the outcome (`asked`, `accepted`, `declined`, `changed`, `replayed`, `unsolicited_answer`, `invalid_answer`, `unsupported_client`), and `elapsed_ms`, how long the answer took. An answer faster than a person also has `no_dialog: true`, and a refused yes `client_answer: "accept"`. The other audit lines: [Security guide](SECURITY_GUIDE.md#audit-log).
+With `--audit-log`, every question and answer gets a `confirmation` line: the point, the tool, the outcome (`asked`, `accepted`, `declined`, `changed`, `replayed`, `unsolicited_answer`, `invalid_answer`, `unsupported_client`, `auto_saved`), and `elapsed_ms`, how long the answer took. An answer faster than a person also has `no_dialog: true`, and a refused yes `client_answer: "accept"`. The other audit lines: [Security guide](SECURITY_GUIDE.md#audit-log).
 
 ## Known gaps
 
