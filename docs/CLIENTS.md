@@ -102,7 +102,7 @@ For one project only, put the same section in `.codex/config.toml` in that folde
 
 ## Claude desktop app
 
-The app has three tabs, and none of them shows the confirmation questions (see the table above), so use it for reading, with `--read-only`.
+The app has three tabs. Confirmation dialogs (elicitation) are not supported in Chat and Cowork, and the Code tab declines them without showing a dialog. For **end-to-end testing, UAT, functional testing and simple configuration work** use `--auto-save` so saves proceed without asking. For production-like safety prefer a client that shows the questions or stay in read-only mode.
 
 - **Chat and Cowork** read `%APPDATA%\Claude\claude_desktop_config.json`:
 
@@ -111,14 +111,15 @@ The app has three tabs, and none of them shows the confirmation questions (see t
     "mcpServers": {
       "sap-gui": {
         "command": "uvx",
-        "args": ["mcp-sap-gui[screenshots]", "--read-only"]
+        "args": ["mcp-sap-gui[screenshots]", "--auto-save"]
       }
     }
   }
   ```
 
-  Quit the app from the tray icon and start it again after editing the file.
-- **Code** is Claude Code: it uses the same configuration as the Claude Code CLI above.
+  For read-only work replace `--auto-save` with `--read-only`. Quit the app from the tray icon and start it again after editing the file.
+
+- **Code** is Claude Code: it uses the same configuration as the Claude Code CLI above. With `--auto-save` it also skips the save confirmation.
 
 ## Google Antigravity
 
