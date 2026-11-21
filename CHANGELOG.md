@@ -1,5 +1,9 @@
 ## Unreleased
 
+### Fixed
+- `sap_screenshot` now prefers PrintWindow (pywin32) to capture the correct SAP GUI window by handle. Avoids capturing other applications on top, wrong Business Client tabs, or black images from minimized windows. Falls back to HardCopy if PrintWindow is unavailable. Result includes a `capture` field. Minimized/invisible windows raise a clear error. Addresses issue #49 from the upstream project.
+
+
 ### Added
 - `--auto-save` flag to skip the always-on save confirmation (useful for UAT / functional / end-to-end testing and Claude Desktop).
 - Windows MessageBox fallback: when an MCP client (notably Claude Desktop) does not show elicitation dialogs, a native Yes/No dialog appears on the desktop so saves can still be approved or rejected.

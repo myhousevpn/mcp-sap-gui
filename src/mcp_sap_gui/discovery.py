@@ -1640,6 +1640,82 @@ class DiscoveryMixin:
                 break
         return topmost
 
+
+    def _capture_with_printwindow(self, window, filepath: str) -> bool:
+        """Capture the window via PrintWindow (DPI-aware). Returns True on success.
+
+        Requires pywin32 and Pillow. Returns False to signal fallback.
+        Raises SAPGUIError for minimized / invisible windows.
+        """
+        try:
+            import win32gui
+            import win32ui
+            import win32con
+            from PIL import Image
+        except ImportError:
+            return False
+
+        try:
+            hwnd = int(window.Handle)
+        except Exception:
+            return False
+
+        if not win32gui.IsWindowVisible(hwnd):
+            raise SAPGUIError(
+                "SAP window is not visible (minimized or on a hidden tab). "
+                "Restore or activate the correct SAP GUI session and try again."
+            )
+
+        # Make the process DPI-aware so coordinates match the real window size
+        try:
+            import ctypes
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+
+        left, top, right, bottom = win32gui.GetWindowRect(hwnd)
+        width = right - left
+        height = bottom - top
+        if width <= 0 or height <= 0:
+            raise SAPGUIError("SAP window has zero size")
+
+        hwndDC = win32gui.GetWindowDC(hwnd)
+        mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+        saveDC = mfcDC.CreateCompatibleDC()
+
+        saveBitMap = win32ui.CreateBitmap()
+        saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+        saveDC.SelectObject(saveBitMap)
+
+        # PW_RENDERFULLCONTENT = 2 on newer Windows; 0 works broadly
+        result = win32gui.PrintWindow(hwnd, saveDC.GetSafeHdc(), 2)
+        if result != 1:
+            # Try without the flag
+            result = win32gui.PrintWindow(hwnd, saveDC.GetSafeHdc(), 0)
+
+        bmpinfo = saveBitMap.GetInfo()
+        bmpstr = saveBitMap.GetBitmapBits(True)
+
+        win32gui.DeleteObject(saveBitMap.GetHandle())
+        saveDC.DeleteDC()
+        mfcDC.DeleteDC()
+        win32gui.ReleaseDC(hwnd, hwndDC)
+
+        if result != 1:
+            return False
+
+        im = Image.frombuffer(
+            "RGB",
+            (bmpinfo["bmWidth"], bmpinfo["bmHeight"]),
+            bmpstr,
+            "raw",
+            "BGRX",
+            0,
+            1,
+        )
+        im.save(filepath, "PNG")
+        return True
+
     def take_screenshot(self, filepath: str = None) -> Dict[str, Any]:
         """
         Take a screenshot of the current SAP window.
@@ -1673,7 +1749,16 @@ class DiscoveryMixin:
             # Find the topmost window (popups are wnd[1], wnd[2], etc.)
             window_id = self._find_topmost_window()
             window = self._find_window(window_id)
-            window.HardCopy(filepath, _HARDCOPY_PNG)
+            capture_method = "hardcopy"
+            try:
+                if self._capture_with_printwindow(window, filepath):
+                    capture_method = "printwindow"
+                else:
+                    window.HardCopy(filepath, _HARDCOPY_PNG)
+            except SAPGUIError:
+                raise
+            except Exception:
+                window.HardCopy(filepath, _HARDCOPY_PNG)
 
             # Optimize image size with Pillow if available
             self._optimize_screenshot(filepath)
@@ -1687,6 +1772,7 @@ class DiscoveryMixin:
                     "format": "png",
                     "encoding": "base64",
                     "window": window_id,
+                    "capture": capture_method,
                     "data": data,
                 }
             else:
@@ -1694,6 +1780,7 @@ class DiscoveryMixin:
                     "format": "png",
                     "filepath": filepath,
                     "window": window_id,
+                    "capture": capture_method,
                 }
 
         except Exception as e:
@@ -1731,7 +1818,18 @@ class DiscoveryMixin:
             target = self._resolve_screenshot_path(save_path)
 
             window_id = self._find_topmost_window()
-            self._find_window(window_id).HardCopy(target, _HARDCOPY_PNG)
+            window = self._find_window(window_id)
+            capture_method = "hardcopy"
+            try:
+                if self._capture_with_printwindow(window, target):
+                    capture_method = "printwindow"
+                else:
+                    window.HardCopy(target, _HARDCOPY_PNG)
+            except SAPGUIError:
+                raise
+            except Exception:
+                window.HardCopy(target, _HARDCOPY_PNG)
+
             if not os.path.isfile(target):
                 raise SAPGUIError("SAP GUI did not write the screenshot file")
 
@@ -1739,6 +1837,7 @@ class DiscoveryMixin:
                 "format": "png",
                 "filepath": target,
                 "window": window_id,
+                "capture": capture_method,
                 "size_bytes": os.path.getsize(target),
             }
             size = self._png_size(target)
